@@ -1,17 +1,13 @@
 package t2;
 
 import net.miginfocom.swing.MigLayout;
-import org.w3c.dom.css.Rect;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.plaf.LayerUI;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.Rectangle2D;
 
 public class LayeredPane extends JFrame {
     JLayeredPane lp;
@@ -45,7 +41,7 @@ public class LayeredPane extends JFrame {
         });
 
         m_panel = new JPanel(new MigLayout("insets 10"));
-        m_panel.setBackground(Color.WHITE);
+        m_panel.setBackground(Color.RED);
         JTextField t = new JTextField("GGWP");
         t.requestFocusInWindow();
 //        m_panel.setComponentZOrder(t, 1);
@@ -124,7 +120,7 @@ public class LayeredPane extends JFrame {
         // Добавляем панель прокрутки в окно
 //        getContentPane().add(scrollPane);
 
-        m_panel.add(scrollPane);
+//        m_panel.add(scrollPane);
 
         setLayeredPane(lp);
 //        setContentPane(m_panel);
@@ -135,7 +131,7 @@ public class LayeredPane extends JFrame {
         setBackground(Color.white);
 
         // Создаем LayerUI для кастомизации
-        LayerUI<JTable> layerUI = new LayerUI<>() {
+        LayerUI<JComponent> layerUI = new LayerUI<>() {
             @Override
             public void paint(Graphics g, JComponent c) {
 
@@ -145,23 +141,23 @@ public class LayeredPane extends JFrame {
 //                System.out.println("C: " + c.getVisibleRect());
 //                Point localPoint = SwingUtilities.convertPoint(lp, lp.getLocation(), c);
 //                Point p1 = SwingUtilities.convertRectangle(c, c.getBounds().x, c.getY());
-                var p2 = SwingUtilities.convertRectangle(c, c.getVisibleRect(), m_panel);
-                System.out.println("lp2: " + p2);
-                var p3 = SwingUtilities.convertRectangle(np, np.getVisibleRect(), m_panel);
+//                var p2 = SwingUtilities.convertRectangle(c, c.getVisibleRect(), m_panel);
+//                System.out.println("lp2: " + p2);
+                var p3 = SwingUtilities.convertRectangle(np, np.getVisibleRect(), c);
                 System.out.println("lp3: " + p3);
 
-                Rectangle r = p2.intersection(p3);
-                var r1 = SwingUtilities.convertRectangle(m_panel, r, c);
-                System.out.println("Intersect: " + r1);
+                Rectangle r = c.getVisibleRect().intersection(p3);
+//                var r1 = SwingUtilities.convertRectangle(m_panel, r, c);
+//                System.out.println("Intersect: " + r1);
 
-                if (p2.intersects(p3)) {
+                if (c.getVisibleRect().intersects(p3)) {
 
 
 //                    var clr = g2d.getColor();
 //                    g.setColor(Color.RED);
-                    var r2 = new Rectangle(r1.x + r1.width, r1.y, c.getWidth() - r1.width, c.getHeight() + r1.height);
-                    g2d.setClip(r2);
-                    System.out.println("r2" + r2);
+//                    var r2 = new Rectangle(r.x + r.width, r.y, c.getWidth() - r.width, c.getHeight() + r.height);
+//                    g2d.setClip(r2);
+//                    System.out.println("r2" + r2);
 //                    var r3.
 
 //                    var clr = g2d.getColor();
@@ -179,7 +175,8 @@ public class LayeredPane extends JFrame {
 //                Rectangle lpi = new Rectangle(localPoint.x, localPoint.y, localPoint.x + lp.getWidth(), localPoint.y + lp.getHeight());
 //                System.out.println("LP: " + lpi);
 //
-//                System.out.println(c.getComponent(1).getClass().getSimpleName());
+                System.out.println("C1: " + c.getClass().getSimpleName());
+                System.out.println("C2: " + c.getComponent(1).getClass().getSimpleName());
 
 //                if (c.getVisibleRect().intersects(lpi)) {
 //                    Rectangle r1 = lp.getBounds();
@@ -205,8 +202,8 @@ public class LayeredPane extends JFrame {
 
 
 
-
-                super.paint(g, c);
+                c.paint(g);
+//                super.paint(g, c);
 //                np.revalidate();
 //                np.repaint();
 
@@ -216,7 +213,7 @@ public class LayeredPane extends JFrame {
 //                    np.revalidate();
 //                    np.repaint();
 //                }
-                g.setColor(new Color(0, 0, 0, 50));
+                g.setColor(new Color(0, 255, 0, 50));
                 g.fillRect(0, 0, c.getWidth(), c.getHeight());
 
                 g.setColor(Color.RED);
@@ -224,7 +221,7 @@ public class LayeredPane extends JFrame {
 //
 //                ((Graphics2D) g).fill(r1);
 //                g.fillRect(r.x, r.y, (int)r.getWidth(), (int)r.getHeight());
-                g.fillRect(r1.x, r1.y, (int)r1.getWidth(), (int)r1.getHeight());
+                g.fillRect(r.x, r.y, (int)r.getWidth(), (int)r.getHeight());
 
 
             }
@@ -261,7 +258,7 @@ public class LayeredPane extends JFrame {
             }
 
             // overridden method which catches MouseMotion events
-            public void eventDispatched(AWTEvent e, JLayer<? extends JTable> l) {
+            public void eventDispatched(AWTEvent e, JLayer<? extends JComponent> l) {
 //                System.out.println("AWTEvent detected: " + e);
 //                System.out.println("CLASS: " + e.getSource().getClass().getSimpleName());
 //                System.out.println();
@@ -279,88 +276,22 @@ public class LayeredPane extends JFrame {
 //                    s.setText("NOTHING");
                 }
             }
-
-            @Override
-            protected void processFocusEvent(FocusEvent e, JLayer<? extends JTable> l) {
-//                if (e.getID() == FocusEvent.FOCUS_GAINED) {
-//                    // Предотвращаем дальнейшую обработку события
-//                    System.out.println("Focus gained - preventing further processing.");
-//                    return; // Не вызываем super.processFocusEvent
-//                }
-//                super.processFocusEvent(e, l); // Обрабатываем другие события
-                np.revalidate();
-                np.repaint();
-            }
-
-            @Override
-            protected void processHierarchyBoundsEvent(HierarchyEvent e, JLayer<? extends JTable> l) {
-//                super.processHierarchyBoundsEvent(e, l);
-                np.revalidate();
-                np.repaint();
-            }
-
-            @Override
-            protected void processHierarchyEvent(HierarchyEvent e, JLayer<? extends JTable> l) {
-//                super.processHierarchyEvent(e, l);
-                np.revalidate();
-                np.repaint();
-            }
-
-            @Override
-            protected void processComponentEvent(ComponentEvent e, JLayer<? extends JTable> l) {
-//                super.processComponentEvent(e, l);
-                np.revalidate();
-                np.repaint();
-
-            }
-
-            @Override
-            protected void processInputMethodEvent(InputMethodEvent e, JLayer<? extends JTable> l) {
-//                super.processInputMethodEvent(e, l);
-                np.revalidate();
-                np.repaint();
-
-            }
-
-            @Override
-            protected void processKeyEvent(KeyEvent e, JLayer<? extends JTable> l) {
-//                super.processKeyEvent(e, l);
-                np.revalidate();
-                np.repaint();
-
-            }
-
-            @Override
-            protected void processMouseEvent(MouseEvent e, JLayer<? extends JTable> l) {
-//                super.processMouseEvent(e, l);
-                np.revalidate();
-                np.repaint();
-
-            }
-
-            @Override
-            protected void processMouseMotionEvent(MouseEvent e, JLayer<? extends JTable> l) {
-//                super.processMouseMotionEvent(e, l);
-                np.revalidate();
-                np.repaint();
-
-            }
-
-            @Override
-            protected void processMouseWheelEvent(MouseWheelEvent e, JLayer<? extends JTable> l) {
-//                super.processMouseWheelEvent(e, l);
-                np.revalidate();
-                np.repaint();
-
-            }
-
-
-
         };
 
         // Оборачиваем JPanel в JLayer
-        JLayer<JTable> jLayer = new JLayer<>(table, layerUI);
+//        m_panel.add(table);
+
+        JPanel x = new JPanel();
+        x.setSize(500,500);
+        x.setBackground(Color.green);
+        x.add(table);
+
+//        m_panel.add(x);
+
+        JLayer<JComponent> jLayer = new JLayer<>(x, layerUI);
         m_panel.add(jLayer);
+//        setSize(500,400);
+//        jLayer.setVisible(true);
 
         addComponentListener(new ComponentAdapter() {
             @Override
